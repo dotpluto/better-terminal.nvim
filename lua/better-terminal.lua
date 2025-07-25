@@ -54,7 +54,7 @@ local function toggle_terminal()
     end, { buffer = buf })
 end
 
----@param opts { keymap: { normal: string, terminal: string } }
+---@param opts { keymap: { normal: string|nil, terminal: string|nil } }
 function M.setup(opts)
     if opts.keymap == nil then
 	opts.keymap = {}
@@ -65,8 +65,8 @@ function M.setup(opts)
     if type(opts.keymap.terminal) == "string" then
 	terminal_keybind = opts.keymap.terminal;
     end
-    vim.keymap.set("n", global_keybind, toggle_terminal, { desc = "Better Terminal" })
-    vim.keymap.set("n", terminal_keybind, toggle_terminal, { desc = "Better Terminal" })
+    vim.keymap.set("n", assert(global_keybind), toggle_terminal, { desc = "Better Terminal" })
+    vim.keymap.set("n", assert(terminal_keybind), toggle_terminal, { desc = "Better Terminal" })
 end
 
 return M;
