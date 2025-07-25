@@ -23,10 +23,17 @@ local function create_win(buf_id)
 end
 
 local function toggle_terminal()
+    -- If the current window is the proper owned floating window it is closed.
     if vim.w[0][window_marker] == true then
         vim.api.nvim_win_close(0, false)
         return
     end
+    -- If the buffer is the right one but the window is the wrong one insert mode is started.
+    if vim.b[0][buffer_marker] == true then
+	vim.cmd.startinsert()
+	return
+    end
+    --If the window is open but not focused it is set as focused.
     for _, win_id in pairs(vim.api.nvim_list_wins()) do
         if vim.w[win_id][window_marker] == true then
             vim.api.nvim_set_current_win(win_id)
@@ -34,7 +41,7 @@ local function toggle_terminal()
             return
         end
     end
-
+    -- The window is not open so the existing buffers are searched for the terminal buffer.
     for _, buf_id in pairs(vim.api.nvim_list_bufs()) do
         if vim.b[buf_id][buffer_marker] == true then
             create_win(buf_id)
@@ -43,6 +50,7 @@ local function toggle_terminal()
         end
     end
 
+    -- The buffer does not exist yet so we need to create it and open a new window.
     local win = create_win(0)
     vim.cmd.terminal()
     vim.cmd.startinsert()
@@ -50,7 +58,9 @@ local function toggle_terminal()
     vim.b[buf][buffer_marker] = true
     vim.keymap.set("t", terminal_keybind, function()
         vim.cmd.stopinsert()
-        vim.api.nvim_win_close(0, false)
+	if vim.w[0][window_marker] == true then
+	    vim.api.nvim_win_close(0, false)
+	end
     end, { buffer = buf })
 end
 
