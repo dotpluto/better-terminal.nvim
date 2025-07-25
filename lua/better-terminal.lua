@@ -3,6 +3,11 @@ local M = {}
 local window_marker = "dotpluto-toggleterm-window"
 local buffer_marker = "dotpluto-toggleterm-buffer"
 
+---@type string
+local global_keybind = "<C-;>"
+---@type string
+local terminal_keybind = "<C-;>"
+
 local function create_win(buf_id)
     local gap_vertical = 3
     local gap_horizontal = 6
@@ -43,15 +48,25 @@ local function toggle_terminal()
     vim.cmd.startinsert()
     local buf = vim.api.nvim_win_get_buf(win)
     vim.b[buf][buffer_marker] = true
-    vim.keymap.set("t", "<C-;>", function()
+    vim.keymap.set("t", terminal_keybind, function()
         vim.cmd.stopinsert()
         vim.api.nvim_win_close(0, false)
     end, { buffer = buf })
 end
 
-function M.setup(_)
-    vim.keymap.set("n", "<C-;>", toggle_terminal, { desc = "Better Terminal" })
-    vim.keymap.set("n", "<leader>t", toggle_terminal, { desc = "Better Terminal" })
+---@param opts { keymap: { normal: string, terminal: string } }
+function M.setup(opts)
+    if opts.keymap == nil then
+	opts.keymap = {}
+    end
+    if type(opts.keymap.normal) == "string" then
+	global_keybind = opts.keymap.normal;
+    end
+    if type(opts.keymap.terminal) == "string" then
+	terminal_keybind = opts.keymap.terminal;
+    end
+    vim.keymap.set("n", global_keybind, toggle_terminal, { desc = "Better Terminal" })
+    vim.keymap.set("n", terminal_keybind, toggle_terminal, { desc = "Better Terminal" })
 end
 
 return M;
